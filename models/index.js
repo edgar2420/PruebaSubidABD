@@ -21,7 +21,7 @@ db.productos = require("./producto.model.js")(sequelize, Sequelize);
 db.especificaciones = require("./especificacion.model.js")(sequelize, Sequelize);
 db.auth_tokens = require("./auth_token.model.js")(sequelize, Sequelize);
 db.protocolos_estudio = require("./protocolo_estudio.model.js")(sequelize, Sequelize);
-db.forma_farmaceutica = require("./Forma_Farmaceutica.model.js")(sequelize, Sequelize);
+db.forma_farmaceutica = require("./forma_Farmaceutica.model.js")(sequelize, Sequelize);
 db.clasificacion_pa = require("./clasificacion_pa.model.js")(sequelize, Sequelize);
 db.frecuencia_muestreo_base = require("./frecuencia_muestreo_base.model.js")(sequelize, Sequelize);
 
