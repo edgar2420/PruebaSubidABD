@@ -7,7 +7,7 @@ const db = require("../models");
 const Formula = db.formula_cuali_cuantitativa;
 const MateriaPrima = db.materias_primas;
 
-//Función para normalizar texto (quita tildes, convierte a minúsculas, etc.)
+// 🔧 Normalizar texto
 const normalizarTexto = (texto) => {
   return texto
     ?.normalize("NFD")
@@ -18,7 +18,7 @@ const normalizarTexto = (texto) => {
     .toLowerCase();
 };
 
-// 🔹 Obtener fórmulas por nombre de producto con normalización
+// 🔹 Obtener fórmulas por nombre de producto (individual)
 exports.obtenerFormulasPorProducto = async (req, res) => {
   try {
     const nombre = req.params.nombre;
@@ -40,6 +40,20 @@ exports.obtenerFormulasPorProducto = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al obtener fórmulas:", error);
     res.status(500).json({ msg: "Error al obtener fórmulas", error });
+  }
+};
+
+// 🔹 Obtener TODAS las fórmulas de todos los productos
+exports.obtenerTodasLasFormulas = async (req, res) => {
+  try {
+    const formulas = await Formula.findAll({
+      include: [{ model: MateriaPrima, as: "materiasPrimas" }]
+    });
+
+    res.status(200).json(formulas);
+  } catch (error) {
+    console.error("❌ Error al obtener todas las fórmulas:", error);
+    res.status(500).json({ msg: "Error al obtener todas las fórmulas" });
   }
 };
 
