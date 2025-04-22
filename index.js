@@ -9,7 +9,7 @@ const db = require("./models");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const corsOptions = { origin: 'http://localhost:5173' };
+const corsOptions = { origin: '*' };
 app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(fileUpload({
