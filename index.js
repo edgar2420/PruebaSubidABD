@@ -3,49 +3,55 @@ const app = express();
 var cors = require('cors');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
+const db = require("./models");
 
-
-// Configuración de middlewares
+// === MIDDLEWARES ===
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const corsOptions = {
-    origin: 'http://localhost:5173',
-};
+const corsOptions = { origin: 'http://localhost:5173' };
 app.use(cors(corsOptions));
-
-// Middleware para archivos estáticos
 app.use(express.static('public'));
-
-// Middleware para la subida de archivos
 app.use(fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 },
-    useTempFiles: true,
-    tempFileDir: "/tmp/",
+  limits: { fileSize: 50 * 1024 * 1024 },
+  useTempFiles: true,
+  tempFileDir: "/tmp/",
 }));
 
-// Sincronizar la base de datos
-const db = require("./models");
-db.sequelize.sync().then(() => {
-    console.log("db resync");
-});
-
-// Importar y usar las rutas
+// === IMPORTAR RUTAS ===
 require('./routes')(app);
 
-
-// Middleware de errores en JSON
+// === MANEJO DE ERRORES JSON ===
 app.use(function (error, req, res, next) {
-    if (error instanceof SyntaxError) {
-        res.status(400).json({
-            msg: 'Error en el JSON'
-        });
-    } else {
-        next();
-    }
+  if (error instanceof SyntaxError) {
+    res.status(400).json({ msg: 'Error en el JSON' });
+  } else {
+    next();
+  }
 });
 
-// Iniciar el servidor
-app.listen(3000, function () {
+// === EJECUTAR SCRIPTS UNA VEZ (SI SE CONFIGURA) ===
+const ejecutarScriptsUnaVez = async () => {
+  try {
+    if (process.env.EJECUTAR_SCRIPTS === "true") {
+      console.log("⚙️ Ejecutando scripts iniciales...");
+
+      await require("./scripts/actualizarValoracionesDesdeExcel")();
+      await require("./scripts/asignarFormaFarmaceutica")();
+      await require("./scripts/limpiarOtrosComponentes")();
+
+      console.log("✅ Todos los scripts se ejecutaron correctamente.");
+    }
+  } catch (error) {
+    console.error("❌ Error al ejecutar los scripts:", error);
+  }
+};
+
+// === SYNC Y START SERVER ===
+db.sequelize.sync().then(() => {
+  ejecutarScriptsUnaVez(); // se ejecuta solo si la variable está activada
+  app.listen(3000, () => {
     console.log('Servidor corriendo en http://localhost:3000');
+  });
 });
+
