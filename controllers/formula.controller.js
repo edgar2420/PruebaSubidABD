@@ -43,14 +43,24 @@ exports.obtenerFormulasPorProducto = async (req, res) => {
   }
 };
 
-// 🔹 Obtener TODAS las fórmulas de todos los productos
+// 🔹 Obtener TODAS las fórmulas con paginación
 exports.obtenerTodasLasFormulas = async (req, res) => {
   try {
-    const formulas = await Formula.findAll({
-      include: [{ model: MateriaPrima, as: "materiasPrimas" }]
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Formula.findAndCountAll({
+      include: [{ model: db.materias_primas, as: "materiasPrimas" }],
+      limit,
+      offset
     });
 
-    res.status(200).json(formulas);
+    res.status(200).json({
+      data: rows,
+      total: count,
+      currentPage: page
+    });
   } catch (error) {
     console.error("❌ Error al obtener todas las fórmulas:", error);
     res.status(500).json({ msg: "Error al obtener todas las fórmulas" });
